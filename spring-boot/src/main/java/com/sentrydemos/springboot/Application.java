@@ -44,24 +44,15 @@ public class Application {
 		public Double sample(SamplingContext context) {
 
 			CustomSamplingContext customSamplingContext = context.getCustomSamplingContext();
-			if (customSamplingContext != null) {
-				HttpServletRequest request = (HttpServletRequest) customSamplingContext.get("request");
-				return 1.0;
+
+		HttpServletRequest request = (HttpServletRequest) customSamplingContext.get("request");
+
+			if (customSamplingContext != null && request.getMethod().equals("OPTIONS")) {
+				return 0.0; 
 			} else {
 				return 1.0;
 			}
+			}
 		}
-	}
 }
 
-// Sentry.init...
-// context -> {
-// 	//context.getTransactionContext().getName() returns String: GET /products
-// 	if (context.getTransactionContext().getOperation().equals("http.server") &&
-// 		context.getTransactionContext().getName().startsWith("OPTIONS")) {
-// 	  //Not sampling OPTIONS transactions
-// 	  return 0.0;
-// 	} else {
-// 	  return 1.0;
-// 	}
-//   });

@@ -133,7 +133,14 @@ class App extends Component {
 
       scope.setTag("backendType", backendType)
 
-      let email = Math.random().toString(36).substring(2, 6) + "@yahoo.com";
+      // making fewer emails so event and user counts for an Issue are not the same
+      let array = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+
+      let a = array[Math.floor(Math.random()*array.length)];
+      let b = array[Math.floor(Math.random()*array.length)];
+      let c = array[Math.floor(Math.random()*array.length)];
+
+      let email = a+b+c+"@gmail.com";
       scope.setUser({ email: email })
     })
 

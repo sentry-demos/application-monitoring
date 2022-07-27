@@ -189,11 +189,12 @@ public class AppController {
 	@CrossOrigin
 	@PostMapping("/checkout")
 	public String CheckoutCart(HttpServletRequest request, @RequestBody String payload) throws Exception {
+		
 		ISpan span = hub.getSpan().startChild("Overhead", "Set tags and map payload to Cart object");
 		setTags(request);
-		
+
 		JSONObject json = new JSONObject(payload);
-		
+
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		Cart cart = objectMapper.readValue(json.get("cart").toString(), Cart.class);
@@ -201,7 +202,7 @@ public class AppController {
 		span.finish();
 		
 		ISpan checkoutSpan = hub.getSpan().startChild("Process Order", "Checkout Cart quantities");
-		
+
 		checkout(cart.getQuantities(), checkoutSpan);
 		
 		checkoutSpan.finish();
