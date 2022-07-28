@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +41,8 @@ public class AppController {
 
 	private final Logger logger = LoggerFactory.getLogger(Application.class);
 	private List<String> headerTags = new ArrayList<>();
+
+	private HttpHeaders headers = new HttpHeaders();
 	private final RestTemplate restTemplate;
 
 	public AppController(RestTemplate restTemplate) {
@@ -71,6 +76,7 @@ public class AppController {
 		for (String tag : headerTags) {
 			String header = request.getHeader(tag);
 			if (header != null && header != "null") {
+				headers.set(tag,header);
 				if (tag == "email") {
 					User user = new User();
 					user.setEmail(header);
@@ -127,7 +133,7 @@ public class AppController {
 		setTags(request);
 
 		String RUBY_BACKEND = "https://application-monitoring-ruby-dot-sales-engineering-sf.appspot.com";
-		ResponseEntity<String> response = restTemplate.getForEntity(RUBY_BACKEND + "/api", String.class);
+		ResponseEntity<String> response = restTemplate.exchange(RUBY_BACKEND + "/api", HttpMethod.GET,new HttpEntity<>(headers), String.class);
 
 		return "springboot /api";
 	}
@@ -165,7 +171,7 @@ public class AppController {
 		span.finish();
 
 		String fooResourceUrl = "https://application-monitoring-ruby-dot-sales-engineering-sf.appspot.com";
-		ResponseEntity<String> response = restTemplate.getForEntity(fooResourceUrl + "/api", String.class);
+		ResponseEntity<String> response = restTemplate.exchange(fooResourceUrl + "/api", HttpMethod.GET,new HttpEntity<>(headers), String.class);
 
 		String allProducts = dbHelper.mapAllProducts(hub.getSpan());
 		return allProducts;
@@ -179,7 +185,7 @@ public class AppController {
 		span.finish();
 
 		String fooResourceUrl = "https://application-monitoring-ruby-dot-sales-engineering-sf.appspot.com";
-		ResponseEntity<String> response = restTemplate.getForEntity(fooResourceUrl + "/api", String.class);
+		ResponseEntity<String> response = restTemplate.exchange(fooResourceUrl + "/api", HttpMethod.GET,new HttpEntity<>(headers), String.class);
 
 		
 		String allProducts = dbHelper.mapAllProductsJoin(hub.getSpan());
