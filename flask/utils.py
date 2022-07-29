@@ -32,3 +32,10 @@ def weighter(condition, hour):
     current_hour = datetime.now(timezone('America/Los_Angeles')).hour
     time_to_sleep = choices(times, weights1) if condition(current_hour, hour)  else choices(times, weights2)
     return time_to_sleep[0]
+
+def parseHeaders(keys, headers):
+    parsedHeaders = {}
+    for key in keys:
+        value = headers.get(key) if headers.get(key) != "undefined" else None
+        parsedHeaders[key] = value
+    return parsedHeaders

@@ -20,11 +20,22 @@ set :allow_headers, "content-type,if-modified-since,accept,access-control-reques
 # This is for Auto Instrumenting the transaction
 use Sentry::Rack::CaptureExceptions
 
-# Parse Request Headers for setting customerType, se, backendType. not working
-# https://github.com/sinatra/sinatra#rack-middleware
-# before do
-#   print "before"
-# end
+before do
+  se = request.env["HTTP_SE"]
+  if !se.nil?
+    Sentry.set_tags("se": se)
+  end
+
+  customerType = request.env["HTTP_CUSTOMERTYPE"]
+  if !customerType.nil?
+    Sentry.set_tags("customerType": customerType)
+  end
+
+  email = request.env["HTTP_EMAIL"]
+  if !email.nil?
+    Sentry.set_tags("email": email)
+  end
+end
 
 get "/" do
   "Sentry Ruby Service says Hello - turn me into a microservice that powers Invoicing, Trucking, or DriverFind"

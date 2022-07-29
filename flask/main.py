@@ -7,7 +7,7 @@ from flask import Flask, json, request, make_response
 from flask_cors import CORS
 from dotenv import load_dotenv
 from db import get_products, get_products_join, get_inventory
-from utils import release, wait
+from utils import release, wait, parseHeaders
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -17,6 +17,7 @@ RELEASE = os.environ.get("RELEASE") or release()
 DSN = os.getenv("FLASK_APP_DSN")
 ENVIRONMENT = os.environ.get("FLASK_ENV") or "production"
 RUBY_BACKEND = os.environ.get("RUBY_BACKEND")
+RUBY_CUSTOM_HEADERS = ['se', 'customerType', 'email']
 
 print("> DSN", DSN)
 print("> RELEASE", RELEASE)
@@ -88,7 +89,7 @@ def success():
     return "success from flask"
 
 @app.route('/products', methods=['GET'])
-def products():    
+def products():   
     try:
         with sentry_sdk.start_span(op="/products.get_products", description="function"):
             rows = get_products()
@@ -97,7 +98,8 @@ def products():
         raise(err)
 
     try:
-        r = requests.get(RUBY_BACKEND + "/api")
+        headers = parseHeaders(RUBY_CUSTOM_HEADERS, request.headers)
+        r = requests.get(RUBY_BACKEND + "/api", headers=headers)
         r.raise_for_status() # returns an HTTPError object if an error has occurred during the process
     except Exception as err:
         sentry_sdk.capture_exception(err)
@@ -105,7 +107,7 @@ def products():
     return rows
 
 @app.route('/products-join', methods=['GET'])
-def products_join():    
+def products_join():
     try:
         with sentry_sdk.start_span(op="/products-join.get_products_join", description="function"):
             rows = get_products_join()
@@ -114,7 +116,8 @@ def products_join():
         raise(err)
 
     try:
-        r = requests.get(RUBY_BACKEND + "/api")
+        headers = parseHeaders(RUBY_CUSTOM_HEADERS, request.headers)
+        r = requests.get(RUBY_BACKEND + "/api", headers=headers)
         r.raise_for_status() # returns an HTTPError object if an error has occurred during the process
     except Exception as err:
         sentry_sdk.capture_exception(err)
